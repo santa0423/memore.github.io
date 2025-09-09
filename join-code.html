@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>가입 코드 입력</title>
+  <link rel="stylesheet" href="join-code.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="fixed812"><!-- 디자인 확인용 375×812 고정. 배포 시 제거 -->
+  <div class="app">
+    <!-- 상단 토스트 -->
+    <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+    <!-- 상단바(44px 아래) -->
+    <div class="topbar">
+      <button class="nav-back" type="button" aria-label="이전" onclick="history.back()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 본문 -->
+    <main class="container">
+      <h1 class="title">가입 코드 입력</h1>
+      <p class="subtitle">코드 연결로 준비된 씨앗을 지급받아요.</p>
+
+      <form id="code-form" class="form" action="#" method="post" novalidate>
+        <div class="field" id="field-code">
+          <div class="label-row">
+            <label for="inviteCode">가입 코드</label>
+            <span class="hint">영문/숫자 6자</span>
+          </div>
+          <input id="inviteCode" name="inviteCode" type="text"
+                 inputmode="latin" autocapitalize="characters" autocorrect="off" spellcheck="false"
+                 maxlength="6" placeholder="예) AB12CD"
+                 aria-invalid="false">
+        </div>
+      </form>
+    </main>
+
+    <div class="cta-wrap">
+      <button id="connectBtn" class="cta" type="button">코드 연결</button>
+    </div>
+  </div>
+
+  <script>
+    // 요소
+    const form   = document.getElementById('code-form');
+    const input  = document.getElementById('inviteCode');
+    const toast  = document.getElementById('toast');
+    const connectBtn = document.getElementById('connectBtn');
+
+    // 토스트
+    let toastTimer=null;
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add('is-show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>toast.classList.remove('is-show'), 2500);
+    }
+
+    // 입력 포맷: 대문자 영숫자만, 최대 6자
+    function sanitizeTo6(val){
+      return val.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0, 6);
+    }
+    input.addEventListener('input', ()=>{
+      const clean = sanitizeTo6(input.value);
+      if (clean !== input.value) input.value = clean;
+      validateSoft();
+    });
+
+    // 소프트 검증(라인 빨강 토글)
+    function markInvalid(el, bad){
+      el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      el.closest('.field')?.classList.toggle('invalid', !!bad);
+    }
+    function validateSoft(){
+      const raw = input.value.trim();
+      const okChars = /^[A-Z0-9]*$/.test(raw);
+      const okLen = raw.length === 6;       // 정확히 6자
+      markInvalid(input, !(okChars && okLen));
+      return okChars && okLen;
+    }
+
+    // 저장 + 이동
+    function saveAndGo(){
+      const code = sanitizeTo6(input.value.trim());
+      if(!validateSoft()){
+        if(code.length===0) showToast('가입 코드를 입력해 주세요.');
+        else showToast('영문/숫자 6자를 입력해 주세요.');
+        input.focus();
+        return;
+      }
+      try{
+        localStorage.setItem('joinCode', JSON.stringify({
+          joinCode: code,
+          savedAt: new Date().toISOString()
+        }));
+      }catch(e){}
+      window.location.href = 'index.html';
+    }
+
+    // 복원
+    function hydrate(){
+      try{
+        const raw = localStorage.getItem('joinCode');
+        if(!raw) return;
+        const data = JSON.parse(raw);
+        if(typeof data.joinCode === 'string') input.value = sanitizeTo6(data.joinCode);
+      }catch(e){}
+      validateSoft();
+    }
+    document.addEventListener('DOMContentLoaded', hydrate);
+
+    // 버튼 → 저장 시도
+    connectBtn.addEventListener('click', saveAndGo);
+    // 엔터 제출
+    form.addEventListener('submit', (e)=>{ e.preventDefault(); saveAndGo(); });
+  </script>
+</body>
+</html>

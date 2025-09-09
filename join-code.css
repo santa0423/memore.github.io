@@ -1,0 +1,102 @@
+:root{
+    --ink:#111315;
+    --muted:#6b7280;
+    --surface:#ffffff;
+    --line:#eceff1;
+    --hint:#9aa0a6;
+    --danger:#e03131;
+    --cta:#9db85c;
+    --cta-ink:#0f1910;
+  }
+  
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; color:var(--ink); background:#fff;
+    font-family:"Noto Sans KR", system-ui, -apple-system, "Malgun Gothic", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  
+  /* 고정 여백: 상44 / 하107 / 좌우16 */
+  .app{
+    position:relative;
+    max-width:375px; min-height:100svh; margin:0 auto;
+    padding-top:44px; padding-right:16px; padding-left:16px; padding-bottom:107px;
+    display:flex; flex-direction:column; gap:16px; background:#fff;
+  }
+  
+  /* ✅ topbar는 '흐름'에 배치 → 바로 아래에 제목이 옴 */
+  .topbar{
+    height:36px;
+    display:flex; align-items:center;
+    margin-bottom:8px;   /* ← 이전 버튼과 제목 사이 간격 */
+  }
+  .nav-back{
+    width:36px; height:36px; border-radius:9999px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--line);
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .nav-back:active{ transform:translateY(1px); }
+  
+  /* 본문(제목/설명) */
+  .container{ display:flex; flex-direction:column; align-items:center; gap:16px; padding-top:0; }
+  
+  /* 제목: topbar 바로 아래 (추가 위마진 없음) */
+  .title{
+    margin:0;                      /* ← 위여백 0 */
+    font-size:26px; font-weight:800; letter-spacing:-.3px; text-align:center;
+  }
+  .subtitle{
+    margin:8px 0; text-align:center; font-size:14px; line-height:1.5; color:var(--muted);
+  }
+  
+  /* 폼 */
+  .form{ display:flex; flex-direction:column; gap:0; width:100%; }
+  .field{ padding:18px 0 16px; border-bottom:1px solid var(--line); }
+  .field:first-child{ border-top:none; }
+  .field.invalid{ border-bottom-color:var(--danger); }
+  .label-row{ display:flex; align-items:flex-end; justify-content:space-between; margin:0 0 8px; width:100%; }
+  label{ font-size:15px; font-weight:700; color:var(--ink); }
+  .hint{ font-size:13px; color:var(--hint); }
+  
+  /* 코드 인풋 */
+  #inviteCode{
+    width:100%; border:none; outline:none; background:#fff;
+    padding:0; font-size:20px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--ink);
+  }
+  #inviteCode::placeholder{ color:#c9cdd2; letter-spacing:0; font-size:16px; }
+  
+  /* CTA */
+  .cta-wrap{ margin-top:auto; padding-bottom:0; }
+  .cta{
+    width:100%; height:52px; border:none; border-radius:12px;
+    background:var(--cta); color:var(--cta-ink);
+    font-size:16px; font-weight:700; letter-spacing:-.2px; cursor:pointer;
+  }
+  .cta:active{ transform:translateY(1px); }
+  
+  /* 토스트 (한 줄 고정) */
+  .toast{
+    position:absolute; left:50%; transform:translateX(-50%);
+    top:8px; z-index:10; display:none;
+    padding:10px 14px; background:var(--danger); color:#fff;
+    border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.15);
+    font-size:13px; letter-spacing:-.2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width:calc(100% - 32px);
+  }
+  .toast.is-show{ display:block; }
+  
+  /* 375×812 고정 미리보기(디자인 확인용) */
+  body.fixed812{
+    background:#f5f5f7; min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+  }
+  body.fixed812 .app{
+    width:375px; height:812px; min-height:auto; margin:0;
+    border-radius:32px; overflow:auto; box-sizing:border-box;
+    padding-top:44px; padding-right:16px; padding-left:16px; padding-bottom:107px;
+  }
+  

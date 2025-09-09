@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>프로필 작성</title>
+  <link rel="stylesheet" href="profile.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="fixed812"><!-- 디자인 확인용 375×812 고정. 배포 시 이 클래스 제거 -->
+  <div class="app">
+    <!-- 상단 토스트 알림 -->
+    <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+    <!-- 상단 44px 여백 아래에 배치된 이전 버튼 -->
+    <div class="topbar">
+      <button class="nav-back" type="button" aria-label="이전" onclick="history.back()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <main class="container form-container">
+      <!-- 프로필 사진(선택) 중앙 -->
+      <label class="avatar-uploader" for="avatar" aria-label="프로필 이미지 업로드"></label>
+      <input id="avatar" name="avatar" type="file" accept="image/*">
+
+      <form id="profile-form" class="form" action="#" method="post" novalidate>
+        <!-- 닉네임 -->
+        <div class="field" id="field-nickname">
+          <div class="label-row">
+            <label for="nickname">닉네임</label>
+            <span class="count" data-count>0/15</span>
+          </div>
+        <input id="nickname" name="nickname" type="text" maxlength="15"
+               placeholder="15자 이내로 입력해주세요" required aria-invalid="false">
+        </div>
+
+        <!-- 한 줄 소개 -->
+        <div class="field" id="field-bio">
+          <div class="label-row"><label for="bio">한 줄 소개</label></div>
+          <input id="bio" name="bio" type="text" placeholder="나의 공간을 존중해줘요 🌵"
+                 required aria-invalid="false">
+        </div>
+
+        <!-- 이메일 -->
+        <div class="field" id="field-email">
+          <div class="label-row"><label for="email">이메일</label></div>
+          <input id="email" name="email" type="email" placeholder="you@example.com"
+                 required aria-invalid="false" inputmode="email" autocomplete="email">
+        </div>
+
+        <!-- 공개/비공개 -->
+        <div class="field">
+          <div class="label-row"><label>공개 범위</label></div>
+          <div class="pills" role="group" aria-label="공개 범위 선택">
+            <button type="button" class="pill is-active" data-value="public">공개</button>
+            <button type="button" class="pill" data-value="private">비공개</button>
+          </div>
+          <input type="hidden" name="visibility" id="visibility" value="public">
+        </div>
+      </form>
+    </main>
+
+    <div class="cta-wrap">
+      <!-- 클릭 시 강제 제출 -->
+      <button id="saveBtn" class="cta" type="button">저장</button>
+    </div>
+  </div>
+
+  <script>
+    // ---- 요소 참조 ----
+    const form = document.getElementById('profile-form');
+    const toast = document.getElementById('toast');
+    const avatarInput = document.getElementById('avatar');   // 선택(필수 아님)
+    const uploader = document.querySelector('.avatar-uploader');
+    const nick = document.getElementById('nickname');
+    const bio  = document.getElementById('bio');
+    const email= document.getElementById('email');
+    const cnt  = document.querySelector('[data-count]');
+    const pills= document.querySelectorAll('.pill');
+    const visibility = document.getElementById('visibility');
+    const saveBtn = document.getElementById('saveBtn');
+
+    // ---- 닉네임 글자수 ----
+    function updateCnt(){ cnt.textContent = `${nick.value.length}/15`; }
+    nick.addEventListener('input', updateCnt); updateCnt();
+
+    // ---- 공개/비공개 토글 ----
+    pills.forEach(b=>b.addEventListener('click', (e)=>{
+      pills.forEach(x=>x.classList.remove('is-active'));
+      e.currentTarget.classList.add('is-active');
+      visibility.value = e.currentTarget.dataset.value;
+    }));
+
+    // ---- 아바타 미리보기 (선택) ----
+    avatarInput.addEventListener('change', () => {
+      const file = avatarInput.files && avatarInput.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      uploader.style.backgroundImage = `url("${url}")`;
+      uploader.style.backgroundSize = 'cover';
+      uploader.style.backgroundPosition = 'center';
+    });
+
+    // ---- 토스트 ----
+    let toastTimer = null;
+    function showToast(message){
+      toast.textContent = message;
+      toast.classList.add('is-show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>toast.classList.remove('is-show'), 2500);
+    }
+
+    // ---- 유효성 검사 (아바타 제외) ----
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    function markInvalid(inputEl, isInvalid){
+      inputEl.setAttribute('aria-invalid', isInvalid ? 'true' : 'false');
+      const wrap = inputEl.closest('.field');
+      if(!wrap) return;
+      wrap.classList.toggle('invalid', !!isInvalid);
+    }
+    function validateAll(){
+      let ok = true;
+      if(nick.value.trim().length === 0){ markInvalid(nick, true); ok = false; } else { markInvalid(nick, false); }
+      if(bio.value.trim().length  === 0){ markInvalid(bio,  true); ok = false; } else { markInvalid(bio,  false); }
+      const v = email.value.trim();
+      if(v.length === 0 || !EMAIL_RE.test(v)){ markInvalid(email, true); ok = false; } else { markInvalid(email, false); }
+      return ok;
+    }
+
+    // ---- 저장/불러오기 ----
+    async function fileToDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = reject;
+        fr.readAsDataURL(file);
+      });
+    }
+
+    async function saveProfile(){
+      let avatarDataUrl = null;
+      // 현재 표시 중 이미지가 dataURL이면 유지
+      const styleBg = uploader.style.backgroundImage;
+      if(styleBg && styleBg.startsWith('url("data:')) {
+        avatarDataUrl = styleBg.slice(5, -2); // url("...") → ...
+      }
+      // 새로 업로드하면 교체
+      if (avatarInput.files && avatarInput.files[0]) {
+        try{ avatarDataUrl = await fileToDataURL(avatarInput.files[0]); }catch(e){}
+      }
+
+      const data = {
+        nickname: nick.value.trim(),
+        bio:      bio.value.trim(),
+        email:    email.value.trim(),
+        visibility: visibility.value,
+        avatar:   avatarDataUrl,           // 선택사항
+        savedAt:  new Date().toISOString()
+      };
+      localStorage.setItem('profile', JSON.stringify(data));
+    }
+
+    function loadProfile(){
+      try{
+        const raw = localStorage.getItem('profile');
+        if(!raw) return;
+        const data = JSON.parse(raw);
+        if(typeof data.nickname === 'string'){ nick.value = data.nickname; }
+        if(typeof data.bio      === 'string'){ bio.value  = data.bio; }
+        if(typeof data.email    === 'string'){ email.value= data.email; }
+        if(typeof data.visibility === 'string'){
+          pills.forEach(x=>x.classList.toggle('is-active', x.dataset.value===data.visibility));
+          visibility.value = data.visibility;
+        }
+        if(data.avatar){
+          uploader.style.backgroundImage = `url("${data.avatar}")`;
+          uploader.style.backgroundSize = 'cover';
+          uploader.style.backgroundPosition = 'center';
+        }
+      }catch(e){}
+      updateCnt();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProfile);
+
+    // ---- 버튼 클릭 → 강제 제출 (브라우저 호환용) ----
+    saveBtn.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      form.requestSubmit(); // 항상 submit 이벤트를 타게 함
+    });
+
+    // ---- submit 핸들러: 검증 → 저장 → index로 이동 ----
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const ok = validateAll();
+      if(!ok){
+        if(nick.getAttribute('aria-invalid')==='true')      showToast('닉네임을 입력해 주세요.');
+        else if(bio.getAttribute('aria-invalid')==='true')  showToast('한 줄 소개를 입력해 주세요.');
+        else if(email.getAttribute('aria-invalid')==='true')showToast('올바른 이메일을 입력해 주세요.');
+        const firstErr = document.querySelector('.field.invalid input');
+        firstErr?.focus();
+        return;
+      }
+      try{
+        await saveProfile();
+      }finally{
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>

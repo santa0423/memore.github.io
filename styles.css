@@ -1,150 +1,108 @@
-/* 375×812 본문 전용 (에센셜/상태바 제외) */
 :root{
   --ink:#111315;
   --muted:#6b7280;
   --surface:#ffffff;
-  --card-border:#e5e7eb;   /* 회색 테두리 */
-  --cta:#9db85c;           /* 버튼 배경 */
+  --line:#eceff1;   /* 회색 테두리 */
+  --cta:#9db85c;
   --cta-ink:#0f1910;
 }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{
-  margin:0;
-  background:#fff;                /* 전체 흰 배경 */
-  color:var(--ink);
+  margin:0; color:var(--ink); background:#fff;
   font-family:"Noto Sans KR", system-ui, -apple-system, "Malgun Gothic", Arial, sans-serif;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }
 
-/* 화면 여백: 위 44px / 아래 107px / 좌우 16px (+ 안전영역) */
+/* === profile과 동일 여백: 상44 / 하107 / 좌우16 고정 === */
 .app{
-  max-width:375px;
-  min-height:100svh;
-  margin:0 auto;
+  max-width:375px; min-height:100svh; margin:0 auto;
 
-  padding-top:    calc(44px + env(safe-area-inset-top, 0px));
-  padding-right:  calc(16px + env(safe-area-inset-right, 0px));
-  padding-left:   calc(16px + env(safe-area-inset-left, 0px));
-  padding-bottom: calc(107px + env(safe-area-inset-bottom, 0px));
+  padding-top:44px;
+  padding-right:16px;
+  padding-left:16px;
+  padding-bottom:107px;
 
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-  background:#fff;
+  display:flex; flex-direction:column; gap:16px; background:#fff;
 }
 
+/* profile과 동일한 상단바(버튼 없는 스페이서) */
+.topbar{
+  height:36px; display:flex; align-items:center; margin-bottom:8px;
+}
+
+/* === hero: 위치/크기는 동일, 원형/배경/테두리 제거 === */
+.hero{ }
+.hero-figure{
+  width:100px; height:100px; margin:0 auto 4px;
+  display:flex; align-items:center; justify-content:center;
+  /* 아래 3줄이 핵심: 원형/배경/테두리 제거 */
+  border:none;
+  border-radius:0;
+  background:transparent;
+}
+.hero-figure img{
+  max-width:100%; max-height:100%;
+  width:auto; height:auto;
+  object-fit:contain; display:block;
+}
+
+/* 콘텐츠 */
 .container{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:16px;
-  /* 여백은 .app에서 관리하므로 0 */
+  display:flex; flex-direction:column; align-items:center; gap:16px;
   padding-top:0;
 }
 
-.brand-mark{ width:72px; height:auto; display:block; }
-
 .title{
   margin:8px 0 0;
-  font-size:24px;
-  font-weight:700;
-  letter-spacing:-.2px;
-  text-align:center;
+  font-size:24px; font-weight:700; letter-spacing:-.2px; text-align:center;
 }
-
 .subtitle{
-  margin:4px 0 8px;
-  text-align:center;
-  font-size:14px;
-  line-height:1.5;
-  color:var(--muted);
+  margin:2px 0 8px; text-align:center; font-size:14px; line-height:1.5; color:var(--muted);
 }
 
+/* 카드 리스트 */
 .cards{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin-top:8px;
+  width:100%; display:flex; flex-direction:column; gap:12px; margin-top:8px;
 }
-
 .card{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  width:100%;
+  display:flex; align-items:center; gap:12px; width:100%;
   background:var(--surface);
-  border:1px solid var(--card-border);   /* 테두리 */
-  border-radius:14px;
-  padding:14px;
-  text-decoration:none;
-  color:inherit;
-  /* 그림자 없음 */
+  border:1px solid var(--line);      /* 회색 테두리 */
+  border-radius:14px; padding:14px;
+  text-decoration:none; color:inherit;
 }
-
-.card-ic{
-  width:24px; height:24px; flex:0 0 24px;
-  object-fit:contain;
-  opacity:.95;
-}
-
-.card-txt{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-  min-width:0;
-  flex:1;
-}
-
-.card-txt strong{
-  font-size:16px;
-  font-weight:600;
-  line-height:1.25;
-}
-
+.card-ic{ width:24px; height:24px; flex:0 0 24px; object-fit:contain; opacity:.95; }
+.card-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+.card-txt strong{ font-size:16px; font-weight:600; line-height:1.25; }
 .card-txt span{
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.35;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  font-size:13px; color:var(--muted); line-height:1.35;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
+.chev{ width:18px; height:18px; flex:0 0 18px; opacity:.7; }
 
-.chev{
-  width:18px; height:18px; flex:0 0 18px; opacity:.7;
-}
-
-/* CTA는 콘텐츠 끝에 위치하고, 하단 107px 여백은 .app padding-bottom으로 확보 */
-.cta-wrap{
-  margin-top:auto;
-  padding-bottom:0;
-}
-
+/* CTA */
+.cta-wrap{ margin-top:auto; padding-bottom:0; }
 .cta{
-  width:100%;
-  height:52px;
-  border-radius:12px;
-  border:none;
-  background:var(--cta);
-  color:var(--cta-ink);
-  font-size:16px;
-  font-weight:700;
-  letter-spacing:-.2px;
-  cursor:pointer;
-  /* 그림자 없음 */
+  width:100%; height:52px; border-radius:12px; border:none;
+  background:var(--cta); color:var(--cta-ink);
+  font-size:16px; font-weight:700; letter-spacing:-.2px; cursor:pointer;
 }
 .cta:active{ transform:translateY(1px); }
 
-/* 데스크톱 프리뷰 시에도 배경/그림자 변화 없음 */
-@media (min-width: 376px){
-  body{ background:#fff; }
-  .app{
-    margin:32px auto;
-    border-radius:32px;
-    overflow:hidden;
-  }
+/* === 375×812 고정 미리보기(디자인 확인용) === */
+body.fixed812{
+  background:#f5f5f7; min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+}
+body.fixed812 .app{
+  width:375px; height:812px; min-height:auto; margin:0;
+  border-radius:32px; overflow:auto; box-sizing:border-box;
+
+  /* 동일 고정 여백 */
+  padding-top:44px;
+  padding-right:16px;
+  padding-left:16px;
+  padding-bottom:107px;
 }
