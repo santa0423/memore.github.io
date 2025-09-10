@@ -9,12 +9,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="fixed812"><!-- 디자인 확인용 375×812 고정. 배포 시 이 클래스 제거 -->
+<body class="fixed812">
   <div class="app">
     <!-- 상단 토스트 알림 -->
     <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
 
-    <!-- 상단 44px 여백 아래에 배치된 이전 버튼 -->
+    <!-- 이전 버튼 (흐름) -->
     <div class="topbar">
       <button class="nav-back" type="button" aria-label="이전" onclick="history.back()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -25,8 +25,10 @@
     </div>
 
     <main class="container form-container">
-      <!-- 프로필 사진(선택) 중앙 -->
-      <label class="avatar-uploader" for="avatar" aria-label="프로필 이미지 업로드"></label>
+      <!-- 프로필 사진(선택) 중앙 - 호환성 높이려고 <img>로 미리보기 -->
+      <label class="avatar-uploader" for="avatar" aria-label="프로필 이미지 업로드">
+        <img id="avatarPreview" class="avatar-preview" alt="">
+      </label>
       <input id="avatar" name="avatar" type="file" accept="image/*">
 
       <form id="profile-form" class="form" action="#" method="post" novalidate>
@@ -36,8 +38,8 @@
             <label for="nickname">닉네임</label>
             <span class="count" data-count>0/15</span>
           </div>
-        <input id="nickname" name="nickname" type="text" maxlength="15"
-               placeholder="15자 이내로 입력해주세요" required aria-invalid="false">
+          <input id="nickname" name="nickname" type="text" maxlength="15"
+                 placeholder="15자 이내로 입력해주세요" required aria-invalid="false">
         </div>
 
         <!-- 한 줄 소개 -->
@@ -67,17 +69,17 @@
     </main>
 
     <div class="cta-wrap">
-      <!-- 클릭 시 강제 제출 -->
       <button id="saveBtn" class="cta" type="button">저장</button>
     </div>
   </div>
 
   <script>
-    // ---- 요소 참조 ----
+    // 요소
     const form = document.getElementById('profile-form');
     const toast = document.getElementById('toast');
     const avatarInput = document.getElementById('avatar');   // 선택(필수 아님)
     const uploader = document.querySelector('.avatar-uploader');
+    const avatarPreview = document.getElementById('avatarPreview');
     const nick = document.getElementById('nickname');
     const bio  = document.getElementById('bio');
     const email= document.getElementById('email');
@@ -86,28 +88,28 @@
     const visibility = document.getElementById('visibility');
     const saveBtn = document.getElementById('saveBtn');
 
-    // ---- 닉네임 글자수 ----
+    // 글자수
     function updateCnt(){ cnt.textContent = `${nick.value.length}/15`; }
     nick.addEventListener('input', updateCnt); updateCnt();
 
-    // ---- 공개/비공개 토글 ----
+    // 공개/비공개
     pills.forEach(b=>b.addEventListener('click', (e)=>{
       pills.forEach(x=>x.classList.remove('is-active'));
       e.currentTarget.classList.add('is-active');
       visibility.value = e.currentTarget.dataset.value;
     }));
 
-    // ---- 아바타 미리보기 (선택) ----
+    // 아바타 미리보기 (선택) — <img src=blob:...> 사용 (호환성↑)
     avatarInput.addEventListener('change', () => {
       const file = avatarInput.files && avatarInput.files[0];
       if (!file) return;
       const url = URL.createObjectURL(file);
-      uploader.style.backgroundImage = `url("${url}")`;
-      uploader.style.backgroundSize = 'cover';
-      uploader.style.backgroundPosition = 'center';
+      avatarPreview.src = url;
+      avatarPreview.onload = () => { URL.revokeObjectURL(url); };
+      uploader.classList.add('has-image');
     });
 
-    // ---- 토스트 ----
+    // 토스트
     let toastTimer = null;
     function showToast(message){
       toast.textContent = message;
@@ -116,7 +118,7 @@
       toastTimer = setTimeout(()=>toast.classList.remove('is-show'), 2500);
     }
 
-    // ---- 유효성 검사 (아바타 제외) ----
+    // 유효성 검사 (아바타 제외)
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     function markInvalid(inputEl, isInvalid){
       inputEl.setAttribute('aria-invalid', isInvalid ? 'true' : 'false');
@@ -133,7 +135,7 @@
       return ok;
     }
 
-    // ---- 저장/불러오기 ----
+    // 저장/불러오기
     async function fileToDataURL(file){
       return new Promise((resolve,reject)=>{
         const fr = new FileReader();
@@ -145,22 +147,17 @@
 
     async function saveProfile(){
       let avatarDataUrl = null;
-      // 현재 표시 중 이미지가 dataURL이면 유지
-      const styleBg = uploader.style.backgroundImage;
-      if(styleBg && styleBg.startsWith('url("data:')) {
-        avatarDataUrl = styleBg.slice(5, -2); // url("...") → ...
-      }
-      // 새로 업로드하면 교체
       if (avatarInput.files && avatarInput.files[0]) {
         try{ avatarDataUrl = await fileToDataURL(avatarInput.files[0]); }catch(e){}
+      }else if(avatarPreview.src && avatarPreview.src.startsWith('data:')){
+        avatarDataUrl = avatarPreview.src;
       }
-
       const data = {
         nickname: nick.value.trim(),
         bio:      bio.value.trim(),
         email:    email.value.trim(),
         visibility: visibility.value,
-        avatar:   avatarDataUrl,           // 선택사항
+        avatar:   avatarDataUrl || null,   // 선택사항
         savedAt:  new Date().toISOString()
       };
       localStorage.setItem('profile', JSON.stringify(data));
@@ -171,31 +168,29 @@
         const raw = localStorage.getItem('profile');
         if(!raw) return;
         const data = JSON.parse(raw);
-        if(typeof data.nickname === 'string'){ nick.value = data.nickname; }
-        if(typeof data.bio      === 'string'){ bio.value  = data.bio; }
-        if(typeof data.email    === 'string'){ email.value= data.email; }
+        if(typeof data.nickname === 'string') nick.value = data.nickname;
+        if(typeof data.bio      === 'string') bio.value  = data.bio;
+        if(typeof data.email    === 'string') email.value= data.email;
         if(typeof data.visibility === 'string'){
           pills.forEach(x=>x.classList.toggle('is-active', x.dataset.value===data.visibility));
           visibility.value = data.visibility;
         }
         if(data.avatar){
-          uploader.style.backgroundImage = `url("${data.avatar}")`;
-          uploader.style.backgroundSize = 'cover';
-          uploader.style.backgroundPosition = 'center';
+          avatarPreview.src = data.avatar;
+          uploader.classList.add('has-image');
         }
       }catch(e){}
       updateCnt();
     }
-
     document.addEventListener('DOMContentLoaded', loadProfile);
 
-    // ---- 버튼 클릭 → 강제 제출 (브라우저 호환용) ----
+    // 버튼 → 강제 제출
     saveBtn.addEventListener('click', (ev)=>{
       ev.preventDefault();
-      form.requestSubmit(); // 항상 submit 이벤트를 타게 함
+      form.requestSubmit();
     });
 
-    // ---- submit 핸들러: 검증 → 저장 → index로 이동 ----
+    // 제출: 검증 → 저장 → index로 이동
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const ok = validateAll();
@@ -207,11 +202,8 @@
         firstErr?.focus();
         return;
       }
-      try{
-        await saveProfile();
-      }finally{
-        window.location.href = 'index.html';
-      }
+      try{ await saveProfile(); }
+      finally{ window.location.href = 'index.html'; }
     });
   </script>
 </body>

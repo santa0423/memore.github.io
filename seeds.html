@@ -9,9 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="fixed812"><!-- 디자인 확인용 375×812 고정. 배포 시 제거 -->
+<body class="fixed812">
   <div class="app">
-    <!-- 상단바(흐름) : 이전 버튼 -->
     <div class="topbar">
       <button class="nav-back" type="button" aria-label="이전" onclick="history.back()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -24,38 +23,35 @@
     <main class="container">
       <h1 class="page-title">내 씨앗을 확인해보세요.</h1>
 
-      <!-- 병 이미지는 임시 파일명입니다. -->
-      <img class="jar" src="jar.png" alt="씨앗 병">
+      <img class="jar" src="images/jar.png" alt="씨앗 병">
 
       <section class="pieces">
-        <!-- 물리 씨앗 -->
-        <article class="piece c-green" data-max="10" data-value="5">
+        <!-- 전부 0/10로 초기화 -->
+        <article class="piece c-green" data-max="10" data-value="0">
           <img class="piece-ic" src="ic_seed_physical.png" alt="물리 씨앗 아이콘">
           <div class="piece-body">
             <h3 class="piece-title">물리 씨앗 조각</h3>
             <div class="progress" aria-hidden="true"></div>
           </div>
-          <span class="badge">5/10</span>
+          <span class="badge">0/10</span>
         </article>
 
-        <!-- 심리 씨앗 -->
-        <article class="piece c-green" data-max="10" data-value="1">
+        <article class="piece c-green" data-max="10" data-value="0">
           <img class="piece-ic" src="ic_seed_psych.png" alt="심리 씨앗 아이콘">
           <div class="piece-body">
             <h3 class="piece-title">심리 씨앗 조각</h3>
             <div class="progress" aria-hidden="true"></div>
           </div>
-          <span class="badge">1/10</span>
+          <span class="badge">0/10</span>
         </article>
 
-        <!-- 온라인 씨앗 -->
-        <article class="piece c-brown" data-max="10" data-value="1">
+        <article class="piece c-brown" data-max="10" data-value="0">
           <img class="piece-ic" src="ic_seed_online.png" alt="온라인 씨앗 아이콘">
           <div class="piece-body">
             <h3 class="piece-title">온라인 씨앗 조각</h3>
             <div class="progress" aria-hidden="true"></div>
           </div>
-          <span class="badge">1/10</span>
+          <span class="badge">0/10</span>
         </article>
       </section>
     </main>
