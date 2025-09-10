@@ -26,7 +26,7 @@
     display:flex; flex-direction:column; gap:16px; background:#fff;
   }
   
-  /* 이전 버튼 아래로 제목(가입코드와 동일 규칙) */
+  /* 이전 버튼 아래로 제목 */
   .topbar{
     height:36px;
     display:flex; align-items:center;
@@ -49,7 +49,7 @@
   
   /* 병 */
   .jar{
-    width:220px; height:auto; display:block; margin:4px auto 8px; object-fit:contain;
+    width:150px; height:auto; display:block; margin:4px auto 8px; object-fit:contain;
   }
   
   /* ===== 카드 ===== */
@@ -60,9 +60,9 @@
   }
   .piece{
     --fill: var(--green);
-    position:relative;             /* 배지 absolute 기준 */
+    position:relative;
     display:flex;
-    align-items:flex-start;
+    align-items:center;        /* ← 아이콘/제목/진행표 세로 중앙 정렬 */
     gap:12px;
     width:100%;
     background:var(--surface);
@@ -73,9 +73,9 @@
   .piece.c-green{ --fill: var(--green); }
   .piece.c-brown{ --fill: var(--brown); }
   
-  .piece-ic{ width:28px; height:28px; flex:0 0 28px; object-fit:contain; }
+  .piece-ic{ width:30px; height:30px; flex:0 0 28px; object-fit:contain; }
   
-  /* 제목+진행바(배지 제외 폭 X → 100% 사용) */
+  /* 제목+진행바 */
   .piece-body{
     flex:1; min-width:0;
     display:flex; flex-direction:column; gap:8px;
@@ -83,19 +83,19 @@
   .piece-title{
     margin:0;
     font-size:16px; font-weight:700; line-height:1.25;
-    padding-right:72px;            /* 제목만 배지와 겹치지 않게 여유 */
+    padding-right:72px;          /* 배지와 겹침 방지 */
   }
   
   /* 배지: 우상단 고정 */
   .badge{
     position:absolute; top:14px; right:14px;
-    padding:4px 6px 4px 6px;
+    padding:3px 6px;
     border-radius:9999px;
     font-size:12px; line-height:1.2;
     color:#fff; background:var(--fill);
   }
   
-  /* 진행바: 너비 100%로 카드의 오른쪽 끝까지 맞춤 */
+  /* 진행바: 카드 오른쪽 끝까지 */
   .progress{
     width:100%;
     display:flex;
