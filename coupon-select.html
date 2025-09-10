@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>할인쿠폰</title>
+<style>
+:root{
+  --ink:#111315; --muted:#6b7280; --line:#e5e7eb;
+  --cta:#9db85c; --cta-ink:#0f1910; --danger:#e11d48;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; color:var(--ink);
+  background:#fff;
+  font-family:"Noto Sans KR", system-ui, -apple-system, "Malgun Gothic", Arial, sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+
+/* 공통 여백: 상64 / 좌우16 / 하107 */
+.app{
+  max-width:375px; min-height:100svh; margin:0 auto;
+  padding:64px 16px 107px;
+  display:flex; flex-direction:column; gap:16px;
+  background:#fff;
+}
+
+/* 토스트(상단) */
+.toast{
+  position:absolute; left:50%; transform:translateX(-50%);
+  top:8px; z-index:10; display:none;
+  padding:10px 14px; background:var(--danger); color:#fff;
+  border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.15);
+  font-size:13px; letter-spacing:-.2px; white-space:nowrap;
+}
+.toast.is-show{ display:block; }
+
+/* 상단바 */
+.topbar{ height:36px; display:flex; align-items:center; gap:12px; }
+.nav-close{
+  width:36px; height:36px; border-radius:9999px;
+  border:1px solid var(--line); background:#fff; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.title{ margin:0; font-size:20px; font-weight:800; letter-spacing:-.2px; }
+
+/* 코드 입력 */
+.code-row{
+  display:grid; grid-template-columns:1fr 84px; gap:8px;
+}
+.code-row input{
+  height:44px; padding:0 14px; border:1px solid var(--line);
+  border-radius:12px; font-size:15px; outline:none;
+}
+.code-row button{
+  height:44px; border-radius:12px; border:1px solid var(--line);
+  background:#fff; font-weight:700; cursor:pointer;
+}
+
+/* 쿠폰 리스트 */
+.list{ display:flex; flex-direction:column; gap:12px; }
+.coupon-card{
+  display:flex; align-items:center; gap:14px; padding:16px;
+  border:1px solid var(--line); border-radius:16px; background:#fff;
+  text-decoration:none; color:inherit; position:relative; cursor:pointer;
+}
+.coupon-card:is(:hover,:focus-within){ border-color:#d7dbdf; }
+.coupon-card.is-selected{ border-color:#b8c98a; box-shadow:0 0 0 2px rgba(157,184,92,.25) inset; }
+
+.amount{
+  font-size:28px; font-weight:800; letter-spacing:-.3px;
+  color:#cbd5e1; line-height:1;
+}
+.card-body{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1; }
+.name{ font-size:16px; font-weight:700; }
+.meta{ font-size:13px; color:#7b8087; }
+
+/* 선택 원형(우측) */
+.selector{
+  width:26px; height:26px; border-radius:9999px;
+  border:2px solid #d1d5db; display:inline-flex; align-items:center; justify-content:center;
+  flex:0 0 26px;
+}
+.coupon-card.is-selected .selector{
+  border-color:#8fb055; background:
+    radial-gradient(circle at 50% 50%, #8fb055 45%, transparent 47%);
+}
+
+/* CTA */
+.cta-wrap{ margin-top:auto; }
+.cta{
+  width:100%; height:52px; border:none; border-radius:12px;
+  background:#e5e7eb; color:#9ca3af; font-weight:800; font-size:18px; letter-spacing:-.2px;
+}
+.cta.is-on{ background:var(--cta); color:var(--cta-ink); cursor:pointer; }
+.cta.is-on:active{ transform:translateY(1px); }
+
+/* 375×812 미리보기 — 바깥은 연회색, 안쪽은 흰색 카드 느낌 */
+body.fixed812{
+  background:#f3f4f6;
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+}
+body.fixed812 .app{
+  width:375px; height:812px; min-height:auto; margin:0;
+  border-radius:32px; overflow:auto; box-sizing:border-box;
+  padding:64px 16px 107px;
+  border:1px solid #e9edf3;
+  /* 필요 시 그림자 추가: box-shadow:0 24px 60px rgba(16,24,40,.12), 0 12px 30px rgba(16,24,40,.08); */
+}
+</style>
+</head>
+<body class="fixed812">
+  <div class="app">
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div class="topbar">
+      <button class="nav-close" type="button" onclick="history.back()" aria-label="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h1 class="title">할인쿠폰</h1>
+    </div>
+
+    <!-- 쿠폰 코드 입력 -->
+    <div class="code-row">
+      <input id="codeInput" type="text" placeholder="쿠폰 코드를 입력하세요" autocomplete="off" />
+      <button id="regBtn" type="button">등록</button>
+    </div>
+
+    <!-- 쿠폰 리스트 (1개) -->
+    <main class="list">
+      <!-- 라벨→div, 라디오→체크박스(숨김)로 변경: 토글 가능 -->
+      <div class="coupon-card" id="couponFree" tabindex="0"
+           role="checkbox" aria-checked="false" aria-label="공간 형성 무료권 선택">
+        <div class="amount">무료</div>
+        <div class="card-body">
+          <div class="name">공간 형성 무료권</div>
+          <div class="meta">발급 후 30일 이내 사용 · 첫 공간 형성 결제 전액 할인</div>
+        </div>
+        <span class="selector" aria-hidden="true"></span>
+        <input id="couponInput" type="checkbox" name="coupon" value="free_seed" hidden>
+      </div>
+    </main>
+
+    <div class="cta-wrap">
+      <!-- 초기 비활성 -->
+      <button id="useBtn" class="cta" type="button" disabled aria-disabled="true">사용하기</button>
+    </div>
+  </div>
+
+<script>
+  const toast = document.getElementById('toast');
+  const regBtn = document.getElementById('regBtn');
+  const codeInput = document.getElementById('codeInput');
+
+  const couponCard = document.getElementById('couponFree');
+  const checkbox = document.getElementById('couponInput');
+  const useBtn = document.getElementById('useBtn');
+
+  let toastTimer=null;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('is-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toast.classList.remove('is-show'), 2000);
+  }
+
+  // 코드 등록(데모): 아무거나 입력하면 오류 토스트
+  regBtn.addEventListener('click', ()=>{
+    const v = codeInput.value.trim();
+    if(!v) { showToast('쿠폰 코드를 입력해 주세요.'); return; }
+    showToast('유효하지 않은 쿠폰 코드입니다.');
+  });
+
+  // 저장 쿠폰 제거
+  function clearSavedCoupon(){
+    try{ localStorage.removeItem('coupon'); }catch(e){}
+  }
+
+  // 선택 상태 설정 (토글 가능)
+  function setSelected(on){
+    couponCard.classList.toggle('is-selected', on);
+    checkbox.checked = on;
+    couponCard.setAttribute('aria-checked', String(on));
+    useBtn.classList.toggle('is-on', on);
+    useBtn.disabled = !on;
+    useBtn.setAttribute('aria-disabled', String(!on));
+
+    // 선택 해제 시 저장된 쿠폰도 즉시 해제(삭제)
+    if(!on) clearSavedCoupon();
+  }
+
+  // 초기 진입: '사용하기'로 저장된 쿠폰이면 자동 선택, 아니면 비선택
+  document.addEventListener('DOMContentLoaded', ()=>{
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('coupon')); } catch(e) { saved = null; }
+    if (saved && saved.id === 'free_seed') {
+      setSelected(true);
+    } else {
+      setSelected(false);
+    }
+  });
+
+  // 카드 클릭/키보드 토글
+  couponCard.addEventListener('click', (e)=>{
+    e.preventDefault();
+    setSelected(!checkbox.checked);
+  });
+  couponCard.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' || e.key===' '){
+      e.preventDefault();
+      setSelected(!checkbox.checked);
+    }
+  });
+
+  // 사용하기 → 저장 후 체크아웃으로 이동
+  useBtn.addEventListener('click', ()=>{
+    if(useBtn.disabled) return;
+    try{
+      localStorage.setItem('coupon', JSON.stringify({
+        id:'free_seed',
+        name:'공간 형성 무료권',
+        type:'FULL',
+        desc:'첫 공간 형성 결제 전액 할인',
+        savedAt:new Date().toISOString()
+      }));
+    }catch(e){}
+    window.location.href = 'checkout.html';
+  });
+</script>
+</body>
+</html>

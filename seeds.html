@@ -26,9 +26,9 @@
       <img class="jar" src="images/jar.png" alt="씨앗 병">
 
       <section class="pieces">
-        <!-- 전부 0/10로 초기화 -->
-        <article class="piece c-green" data-max="10" data-value="0">
-          <img class="piece-ic" src="images/ic_seed_physical.png" alt="물리 씨앗 아이콘">
+        <!-- 카드 클릭 시 data-key로 모달 내용 결정 -->
+        <article class="piece c-green" data-key="physical" data-max="10" data-value="0">
+          <img class="piece-ic" src="images/ic_seed_physical.png" alt="">
           <div class="piece-body">
             <h3 class="piece-title">물리 씨앗 조각</h3>
             <div class="progress" aria-hidden="true"></div>
@@ -36,8 +36,8 @@
           <span class="badge">0/10</span>
         </article>
 
-        <article class="piece c-green" data-max="10" data-value="0">
-          <img class="piece-ic" src="images/ic_seed_psych.png" alt="심리 씨앗 아이콘">
+        <article class="piece c-green" data-key="psych" data-max="10" data-value="0">
+          <img class="piece-ic" src="images/ic_seed_psych.png" alt="">
           <div class="piece-body">
             <h3 class="piece-title">심리 씨앗 조각</h3>
             <div class="progress" aria-hidden="true"></div>
@@ -45,8 +45,8 @@
           <span class="badge">0/10</span>
         </article>
 
-        <article class="piece c-brown" data-max="10" data-value="0">
-          <img class="piece-ic" src="images/ic_seed_online.png" alt="온라인 씨앗 아이콘">
+        <article class="piece c-brown" data-key="online" data-max="10" data-value="0">
+          <img class="piece-ic" src="images/ic_seed_online.png" alt="">
           <div class="piece-body">
             <h3 class="piece-title">온라인 씨앗 조각</h3>
             <div class="progress" aria-hidden="true"></div>
@@ -57,12 +57,25 @@
     </main>
 
     <div class="cta-wrap">
-      <button class="cta" type="button" onclick="window.location.href='plant.html'">씨앗 심으러 가기</button>
+      <button class="cta" type="button" onclick="window.location.href='coupon.html'">씨앗 심으러 가기</button>
     </div>
   </div>
 
+  <!-- ===== 모달(재사용) ===== -->
+  <div id="backdrop" class="backdrop" tabindex="-1" hidden></div>
+  <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+    <button class="sheet-close" type="button" aria-label="닫기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" stroke="#9aa0a6" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <img id="sheetIcon" class="sheet-icon" src="" alt="">
+    <h2 id="sheetTitle" class="sheet-title"></h2>
+    <p id="sheetDesc" class="sheet-desc"></p>
+  </div>
+
   <script>
-    // 진행 바(10칸) 렌더링
+    // --- 진행 바 렌더링 ---
     document.querySelectorAll('.piece').forEach(card=>{
       const max = Number(card.dataset.max || 10);
       const val = Math.max(0, Math.min(max, Number(card.dataset.value || 0)));
@@ -73,9 +86,63 @@
         dot.className = 'dot' + (i < val ? ' on' : '');
         bar.appendChild(dot);
       }
-      const badge = card.querySelector('.badge');
-      if(badge) badge.textContent = `${val}/${max}`;
+      card.querySelector('.badge').textContent = `${val}/${max}`;
     });
+
+    // --- 모달 데이터 ---
+    const SHEED = {
+      physical:{
+        title:'물리 씨앗 조각',
+        desc:'물리 씨앗 조각은 내 주변의 물리적 공간을 지키고 싶은 마음을 뜻합니다. 가까운 거리에서 마주할 때의 감정과 경계가 이 씨앗에 담겨 있습니다.',
+        icon:'images/ic_seed_physical.png'
+      },
+      psych:{
+        title:'심리 씨앗 조각',
+        desc:'심리 씨앗 조각은 내 주변의 감정적 공간을 지키고 싶은 마음을 뜻합니다. 가까운 관계에서 주고받는 말과 태도 속 감정과 경계가 이 씨앗에 담겨 있습니다.',
+        icon:'images/ic_seed_psych.png'
+      },
+      online:{
+        title:'온라인 씨앗 조각',
+        desc:'온라인 씨앗 조각은 디지털 공간에서 나만의 리듬과 여유를 지키고 싶은 마음을 뜻합니다. 메시지, 댓글, 알림 속에서 마주친 감정과 경계가 이 씨앗에 담겨 있습니다.',
+        icon:'images/ic_seed_online.png'
+      }
+    };
+
+    const sheet    = document.getElementById('sheet');
+    const backdrop = document.getElementById('backdrop');
+    const sIcon    = document.getElementById('sheetIcon');
+    const sTitle   = document.getElementById('sheetTitle');
+    const sDesc    = document.getElementById('sheetDesc');
+    const btnClose = document.querySelector('.sheet-close');
+
+    function openSheet(key){
+      const data = SHEED[key];
+      if(!data) return;
+      sIcon.src   = data.icon;
+      sIcon.alt   = `${data.title} 아이콘`;
+      sTitle.textContent = data.title;
+      sDesc.textContent  = data.desc;
+      sheet.hidden = false; backdrop.hidden = false;
+      requestAnimationFrame(()=>{
+        sheet.classList.add('is-open');
+        backdrop.classList.add('is-open');
+      });
+    }
+    function closeSheet(){
+      sheet.classList.remove('is-open');
+      backdrop.classList.remove('is-open');
+      setTimeout(()=>{ sheet.hidden = true; backdrop.hidden = true; }, 180);
+    }
+
+    // 카드 클릭 → 모달 열기
+    document.querySelectorAll('.piece').forEach(card=>{
+      card.addEventListener('click', ()=> openSheet(card.dataset.key));
+    });
+
+    // 닫기(버튼/배경/Esc)
+    btnClose.addEventListener('click', closeSheet);
+    backdrop.addEventListener('click', closeSheet);
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSheet(); });
   </script>
 </body>
 </html>

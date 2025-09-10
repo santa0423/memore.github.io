@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>결제</title>
+<style>
+:root{
+  --ink:#111315; --muted:#6b7280; --surface:#fff; --line:#e5e7eb;
+  --cta:#9db85c; --cta-ink:#0f1910;
+
+  /* ▶︎ 버튼 위치를 모든 화면에서 동일하게 만들 하단 여백(예전 값 유지) */
+  --footer-gap: 107px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); background:#f5f5f7;
+  font-family:"Noto Sans KR",system-ui,-apple-system,"Malgun Gothic",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+
+/* 미리보기(375×812) — 중앙 고정 + 스크롤 차단 */
+body.fixed812{
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;                 /* 페이지 스크롤 방지 */
+  overscroll-behavior:none;
+}
+body.fixed812 .app{ margin:0; }
+
+/* Phone preview 375×812 */
+.app{
+  width:375px; height:812px;
+  margin:0 auto;
+  background:#fff; border:none; border-radius:32px;
+  overflow:hidden;                 /* 내부 스크롤 방지 */
+  display:flex; flex-direction:column; gap:16px;
+
+  /* ▶︎ 상64 / 좌우16 / 하 107px(고정) — 버튼 하단 위치 고정 */
+  padding:64px 16px var(--footer-gap);
+}
+
+/* Layout */
+.container{display:flex;flex-direction:column;gap:16px}
+.page-title{margin:0;text-align:center;font-size:22px;font-weight:800;letter-spacing:-.3px}
+
+/* Summary */
+.summary{margin-top:20px;margin-bottom:8px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center}
+.total .label{font-size:15px;margin-bottom:6px}
+.total .amount{font-size:0}
+.total .amount strong{font-size:36px;line-height:1;font-weight:800;letter-spacing:-.3px}
+.total .amount span{margin-left:4px;font-size:16px;font-weight:700}
+.total .orig{margin-right:8px;color:#a3a8ae;text-decoration:line-through;font-weight:600;font-size:16px;vertical-align:middle}
+
+.hero{position:relative; height:20px;display:flex;justify-content:center;align-items:center}
+.halo{position:absolute;width:180px;height:92px;border-radius:9999px;
+      background:radial-gradient(closest-side,#dfe9c5 0%,#d2dfb0 55%,rgba(210,223,176,0) 56%)}
+.cactus{position:relative;width:56px;height:auto;image-rendering:pixelated;z-index:1}
+
+/* Items */
+.section-title{margin:8px 0 0;font-size:15px;font-weight:700}
+.list{display:flex;flex-direction:column;gap:10px}
+.card{
+  display:flex;align-items:center;gap:16px;width:100%;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:16px;padding:12px 14px;text-decoration:none;color:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.card:focus-visible{ outline:2px solid var(--cta); outline-offset:2px; border-radius:16px; }
+.seed-ic{width:32px;height:32px;object-fit:contain}
+.card-body{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.price{font-size:18px;font-weight:800;line-height:1.1}
+.price .orig{margin-right:8px;color:#a3a8ae;text-decoration:line-through;font-weight:600}
+.sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.check{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center}
+
+/* Divider */
+.dash{border-top:2px dashed #cfd7b6;margin:8px 0 10px}
+
+/* Coupon row (항상 선택 페이지로 이동) */
+.coupon{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--line);
+        border-radius:16px;background:#fff;text-decoration:none;color:inherit}
+.coupon-txt{font-size:15px;color:#6b7280}
+.coupon-ic{margin-left:auto;width:32px;height:32px;border-radius:9999px;background:#eef2e0;display:inline-flex;align-items:center;justify-content:center}
+.pill{margin-left:auto;display:none;align-items:center;gap:6px;padding:6px 10px;border-radius:9999px;background:#eef2e0;border:1px solid #d9e7b0;
+      font-size:12px;font-weight:800;color:#283315}
+
+/* CTA — 마지막 요소로 두고 자동으로 아래로 밀착 */
+.cta-wrap{ margin-top:auto; }
+.cta{
+  width:100%; height:52px; border:none; border-radius:12px;
+  background:var(--cta); color:var(--cta-ink);
+  font-size:18px; font-weight:800; letter-spacing:-.2px; cursor:pointer;
+}
+.cta:active{ transform:translateY(1px) }
+</style>
+</head>
+<body class="fixed812">
+  <div class="app">
+    <main class="container">
+      <h1 class="page-title">내 씨앗들에게 필요한 공간은?</h1>
+
+      <section class="summary">
+        <div class="total">
+          <div class="label">총 결제 금액</div>
+          <div class="amount" aria-live="polite">
+            <strong>10,000</strong><span>원</span>
+          </div>
+        </div>
+        <div class="hero" aria-hidden="true">
+          <div class="halo"></div>
+          <img class="cactus" src="cactus.png" alt="">
+        </div>
+      </section>
+
+      <h2 class="section-title">결제 내용</h2>
+      <div class="list">
+        <a class="card" href="detail-physical.html" aria-label="물리 민감도 상세 보기">
+          <img class="seed-ic" src="image 921.png" alt="">
+          <div class="card-body">
+            <div class="price" data-base="2000">2,000원</div>
+            <div class="sub">[물리 민감도] 자세히 보기</div>
+          </div>
+          <span class="check" aria-hidden="true">✓</span>
+        </a>
+
+        <a class="card" href="detail-psych.html" aria-label="심리 민감도 상세 보기">
+          <img class="seed-ic" src="Group 2609187.png" alt="">
+          <div class="card-body">
+            <div class="price" data-base="3500">3,500원</div>
+            <div class="sub">[심리 민감도] 자세히 보기</div>
+          </div>
+          <span class="check" aria-hidden="true">✓</span>
+        </a>
+
+        <a class="card" href="detail-online.html" aria-label="온라인 민감도 상세 보기">
+          <img class="seed-ic" src="Group 2609203.png" alt="">
+          <div class="card-body">
+            <div class="price" data-base="4500">4,500원</div>
+            <div class="sub">[온라인 민감도] 자세히 보기</div>
+          </div>
+          <span class="check" aria-hidden="true">✓</span>
+        </a>
+      </div>
+
+      <div class="dash"></div>
+
+      <h2 class="section-title">쿠폰</h2>
+      <!-- 어디를 눌러도 쿠폰 선택 페이지로 이동 -->
+      <a class="coupon" id="couponRow" href="coupon-select.html">
+        <span id="couponText" class="coupon-txt">보유 쿠폰 1장</span>
+        <span id="couponIcon" class="coupon-ic" aria-hidden="true">›</span>
+        <span id="couponPill" class="pill"><span>선택됨</span><span aria-hidden="true">✓</span></span>
+      </a>
+    </main>
+
+    <!-- ▶︎ 버튼은 항상 동일 위치: .app의 하단 패딩(107px) 위에 표시 -->
+    <div class="cta-wrap">
+      <button class="cta" type="button">결제하기</button>
+    </div>
+  </div>
+
+<script>
+  const COUPON_ID = 'free_seed';
+  const $ = s => document.querySelector(s);
+  const fmt = n => (Number(n)||0).toLocaleString('ko-KR');
+
+  function hasCoupon(){
+    try{
+      const raw = localStorage.getItem('coupon');
+      if(!raw) return false;
+      const c = JSON.parse(raw);
+      return c && c.id === COUPON_ID;
+    }catch(e){ return false; }
+  }
+
+  function baseTotal(){
+    return [...document.querySelectorAll('.price')]
+      .map(el => Number(el.dataset.base)||0)
+      .reduce((a,b)=>a+b,0);
+  }
+
+  function render(){
+    const applied = hasCoupon();
+
+    // 총액
+    const amountBox = document.querySelector('.total .amount');
+    const total = baseTotal();
+    amountBox.innerHTML = applied
+      ? `<span class="orig">${fmt(total)}원</span> <strong>0</strong><span>원</span>`
+      : `<strong>${fmt(total)}</strong><span>원</span>`;
+
+    // 항목 가격
+    document.querySelectorAll('.price').forEach(el=>{
+      const base = Number(el.dataset.base)||0;
+      el.innerHTML = applied
+        ? `<span class="orig">${fmt(base)}원</span> 0원`
+        : `${fmt(base)}원`;
+    });
+
+    // 쿠폰 행
+    $('#couponText').textContent = applied
+      ? '공간 형성 무료권 (웰컴 쿠폰)'
+      : '보유 쿠폰 1장';
+    $('#couponIcon').style.display = applied ? 'none' : '';
+    $('#couponPill').style.display = applied ? 'inline-flex' : 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', render);
+  window.addEventListener('pageshow', render);  // 뒤로가기 복원
+  window.addEventListener('storage', render);   // 다른 탭 변경
+</script>
+</body>
+</html>

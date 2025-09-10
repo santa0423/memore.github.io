@@ -1,0 +1,59 @@
+<!-- coupon.html -->
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>웰컴 쿠폰 혜택</title>
+  <link rel="stylesheet" href="coupon.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="fixed812"><!-- 디자인 확인용 375×812 고정. 배포 시 이 클래스 제거 -->
+  <div class="app">
+    <main class="container">
+      <h1 class="title">MEMORE에 처음 오신<br>회원님을 위한 쿠폰 혜택</h1>
+      <p class="subtitle">신규 회원님께는 공간 형성 무료권과<br>보너스 씨앗을 담은 웰컴 쿠폰을 드려요.</p>
+
+      <section class="coupons">
+        <!-- 공간 형성 무료권 -->
+        <article class="coupon">
+          <div class="ticket">
+            <span class="ribbon">웰컴<br>기념</span>
+            <div class="brand">MEMORE</div>
+            <div class="coupon-title">공간 형성<br>무료권</div>
+          </div>
+          <!-- 절취선: 두 상자 사이 -->
+          <div class="perfo" aria-hidden="true"></div>
+          <div class="coupon-foot">
+            첫 공간 형성 비용<br>전액 할인
+          </div>
+        </article>
+
+        <!-- 보너스 씨앗 6개 증정 -->
+        <article class="coupon">
+          <div class="ticket">
+            <span class="ribbon">웰컴<br>기념</span>
+            <div class="brand">MEMORE</div>
+            <div class="coupon-title">보너스 씨앗<br>6개 증정</div>
+          </div>
+          <!-- 절취선 -->
+          <div class="perfo" aria-hidden="true"></div>
+          <div class="coupon-foot">
+            씨앗 종류 선택 가능
+          </div>
+        </article>
+      </section>
+
+      <p class="muted">유효기간<br><span>발급일로부터 365일</span></p>
+    </main>
+
+    <div class="cta-wrap">
+      <button class="cta" type="button" onclick="window.location.href='checkout.html'">
+        쿠폰받고 결제페이지로
+      </button>
+    </div>
+  </div>
+</body>
+</html>
